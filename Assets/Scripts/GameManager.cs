@@ -15,5 +15,4 @@ public class GameManager : MonoBehaviour
     public ItemContainer inventoryContainer;
     public ItemDragAndDropController itemDragAndDropController;
     public ItemSpawnManager itemSpawnManager;
-    public PopupManager popupManager;
 }

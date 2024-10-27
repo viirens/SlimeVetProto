@@ -363,12 +363,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11cfdc912f9aa483a94b2a8e7c980c79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waypoint: {fileID: 0}
   speed: 5
   arrivalThreshold: 0.1
   obstacleAvoidanceDistance: 1
   hasArrived: 0
   isInteractable: 0
+  waypointRadius: 5
 --- !u!114 &532818699629432841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,6 +387,8 @@ MonoBehaviour:
   injuredSprite: {fileID: 21300000, guid: 18914e6e6b35d4b6f911a4efba9cd0ad, type: 3}
   itemSprite: {fileID: 4521971894355334131}
   itemRequirement: {fileID: 11400000, guid: 15bdfb5b9473443d4b83fa89b86e3999, type: 2}
+  timeToLive: 30
+  healingDuration: 3
 --- !u!114 &4462438445869637570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,4 +401,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc65edb829ac48928f153167042ad4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grid: {fileID: 0}

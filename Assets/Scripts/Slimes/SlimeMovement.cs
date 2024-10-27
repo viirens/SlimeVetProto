@@ -183,4 +183,11 @@ public class SlimeMovement : MonoBehaviour
     {
         Debug.Log("Collided with " + collision.gameObject.name);
     }
+
+    //debug visualization of waypoint radius
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(waypoint.position, waypointRadius);
+    }
 }

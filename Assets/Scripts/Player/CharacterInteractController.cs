@@ -46,6 +46,7 @@ public class CharacterInteractController : MonoBehaviour
             if (hit != null)
             {
                 highlightController.Highlight(hit.gameObject);
+                // highlightController.ShowProgressBar(0, 0, hit.gameObject.transform.position);
                 return;
             }
         }

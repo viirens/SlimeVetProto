@@ -28,7 +28,9 @@ public class Slime : Interactable
 
     private bool isBeingHealed = false;
     private float healingProgress = 0f;
-    private float healingDuration = 5f; // Match this with PopupManager's duration
+    [SerializeField] private float healingDuration = 5f; 
+
+    private HighlightController highlightController;
 
     void Start()
     {
@@ -44,6 +46,8 @@ public class Slime : Interactable
 
         RandomizeColor();
         Debug.Log("Slime initialized with state: " + currentState);
+
+        highlightController = FindObjectOfType<HighlightController>();
     }
 
     void Update()
@@ -51,20 +55,9 @@ public class Slime : Interactable
         if (isTimerActive)
         {
             timer -= Time.deltaTime;
-            // Debug.Log("Slime timer: " + timer);
             if (timer <= 0)
             {
                 SlimeDies();
-            }
-        }
-
-        if (isBeingHealed)
-        {
-            healingProgress += Time.deltaTime;
-            Debug.Log("Healing progress: " + healingProgress);
-            if (healingProgress >= healingDuration)
-            {
-                CompleteHealing();
             }
         }
     }
@@ -83,6 +76,45 @@ public class Slime : Interactable
         }
     }
 
+    public override void InteractHold(Character character)
+    {
+        if (isInteractable && currentState == SlimeState.Injured && character.HasItem(requiredItem))
+        {
+            Debug.Log("InteractHold called");
+            if (!isBeingHealed)
+            {
+                Debug.Log("InteractHold called and isBeingHealed is false");
+                character.RemoveItem(requiredItem, 1);
+                isBeingHealed = true;
+                isTimerActive = false;
+                highlightController.ShowProgressBar(transform.position);
+            }
+
+            healingProgress += Time.deltaTime;
+            highlightController.UpdateProgressBar(healingProgress / healingDuration);
+
+            if (healingProgress >= healingDuration)
+            {
+                CompleteHealing();
+            }
+        }
+        else
+        {
+            Debug.Log("InteractHold failed: Slime not interactable or character lacks required item.");
+        }
+    }
+
+    public override void InteractReleased(Character character)
+    {
+        if (isBeingHealed)
+        {
+            isBeingHealed = false;
+            healingProgress = 0f;
+            isTimerActive = true;
+            highlightController.HideProgressBar();
+        }
+    }
+
     private void StartHealing()
     {
         isBeingHealed = true;
@@ -95,16 +127,17 @@ public class Slime : Interactable
     {
         isBeingHealed = false;
         SetState(SlimeState.Healthy);
-        Debug.Log("Slime healed and state set to Healthy");
+        Debug.Log("Healing complete: Slime state set to Healthy.");
 
         SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
         if (slimeMovement != null)
         {
             slimeMovement.MoveToExit();
-            Debug.Log("Slime is moving to exit");
+            Debug.Log("Slime is moving to exit.");
         }
 
         itemSprite.SetActive(false);
+        highlightController.HideProgressBar();
     }
 
     private void ChooseRandomItem()
