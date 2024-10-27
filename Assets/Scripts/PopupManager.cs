@@ -7,8 +7,13 @@ using UnityEngine.EventSystems;
 public class PopupManager : MonoBehaviour
 {
     public GameObject popupPrefab; // Assign a popup prefab in the editor
+    public GameObject progressBarPrefab;
     private GameObject popupInstance;
     private Slime currentSlime;
+    private GameObject fillSpriteInstance;
+    private float interactionDuration = 5f; // Duration in seconds for the interaction
+    private float interactionTimer = 0f;
+    private bool isInteracting = false;
 
     // Start is called before the first frame update
     void Start()
@@ -19,7 +24,24 @@ public class PopupManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (isInteracting)
+        {
+            interactionTimer += Time.deltaTime;
+            if (fillSpriteInstance != null)
+            {
+                RectTransform fillRect = fillSpriteInstance.GetComponent<RectTransform>();
+                if (fillRect != null)
+                {
+                    float fillAmount = interactionTimer / interactionDuration;
+                    fillRect.localScale = new Vector3(fillAmount, 1, 1);
+                }
+            }
+
+            if (interactionTimer >= interactionDuration)
+            {
+                CompleteInteraction();
+            }
+        }
     }
 
     public void ShowPopup(Slime slime)
@@ -47,20 +69,34 @@ public class PopupManager : MonoBehaviour
             {
                 popupButton.onClick.AddListener(OnPopupButtonClicked);
             }
+
+            // Instantiate the progress bar and find the fill sprite
+            GameObject progressBarInstance = Instantiate(progressBarPrefab, popupInstance.transform);
+            fillSpriteInstance = progressBarInstance.transform.Find("Fill").gameObject;
+            RectTransform fillRect = fillSpriteInstance.GetComponent<RectTransform>();
+            if (fillRect != null)
+            {
+                fillRect.localScale = new Vector3(0, 1, 1);
+            }
+
+            isInteracting = true;
+            interactionTimer = 0f;
+        }
+    }
+
+    private void CompleteInteraction()
+    {
+        isInteracting = false;
+        if (popupInstance != null && currentSlime != null)
+        {
+            Destroy(popupInstance);
+            currentSlime.SetState(Slime.SlimeState.Healthy);
+            currentSlime.GetComponent<SlimeMovement>().MoveToExit();
         }
     }
 
     public void OnPopupButtonClicked()
     {
         Debug.Log("Popup button clicked");
-        if (popupInstance != null && currentSlime != null)
-        {
-            Destroy(popupInstance);
-            currentSlime.SetState(Slime.SlimeState.Healthy);
-            Debug.Log(currentSlime.GetComponent<SlimeMovement>());
-            // Debug.Log(currentSlime.GetComponent<SlimeMovement>().MoveToExit);
-            currentSlime.GetComponent<SlimeMovement>().MoveToExit();
-        }
     }
-
 }

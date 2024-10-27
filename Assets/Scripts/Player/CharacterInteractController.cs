@@ -23,9 +23,15 @@ public class CharacterInteractController : MonoBehaviour
     void Update()
     {
         CheckForInteractableObjects();
-        if (Input.GetMouseButtonDown(1))
+
+        if (Input.GetMouseButton(1))
         {
-            Interact();
+            InteractHold();
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            InteractReleased();
         }
     }
 
@@ -79,5 +85,45 @@ public class CharacterInteractController : MonoBehaviour
 
         // Draw the overlap circle
         Gizmos.DrawWireSphere(position, sizeOfInteractableArea);
+    }
+
+    void InteractHold()
+    {
+        Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+        foreach (Collider2D collider in colliders)
+        {
+            Interactable interactable = collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                Vector2 directionToCollider = (collider.transform.position - transform.position).normalized;
+                if (Vector2.Dot(characterController.lastMotionVector, directionToCollider) > 0.5f)
+                {
+                    interactable.InteractHold(character);
+                    break;
+                }
+            }
+        }
+    }
+
+    void InteractReleased()
+    {
+        Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+        foreach (Collider2D collider in colliders)
+        {
+            Interactable interactable = collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                Vector2 directionToCollider = (collider.transform.position - transform.position).normalized;
+                if (Vector2.Dot(characterController.lastMotionVector, directionToCollider) > 0.5f)
+                {
+                    interactable.InteractReleased(character);
+                    break;
+                }
+            }
+        }
     }
 }

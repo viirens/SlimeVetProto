@@ -26,6 +26,10 @@ public class Slime : Interactable
     private float timer;
     private bool isTimerActive = false;
 
+    private bool isBeingHealed = false;
+    private float healingProgress = 0f;
+    private float healingDuration = 5f; // Match this with PopupManager's duration
+
     void Start()
     {
         requiresOverlap = customRequiresOverlap;
@@ -38,8 +42,8 @@ public class Slime : Interactable
         timer = timeToLive;
         isTimerActive = true;
 
-        // Randomize the color of the slime
         RandomizeColor();
+        Debug.Log("Slime initialized with state: " + currentState);
     }
 
     void Update()
@@ -47,37 +51,60 @@ public class Slime : Interactable
         if (isTimerActive)
         {
             timer -= Time.deltaTime;
+            // Debug.Log("Slime timer: " + timer);
             if (timer <= 0)
             {
                 SlimeDies();
+            }
+        }
+
+        if (isBeingHealed)
+        {
+            healingProgress += Time.deltaTime;
+            Debug.Log("Healing progress: " + healingProgress);
+            if (healingProgress >= healingDuration)
+            {
+                CompleteHealing();
             }
         }
     }
 
     public override void Interact(Character character)
     {
-        if (isInteractable && currentState == SlimeState.Injured)
+        if (isInteractable && currentState == SlimeState.Injured && character.HasItem(requiredItem))
         {
-            if (character.HasItem(requiredItem))
-            {
-                character.RemoveItem(requiredItem, 1); // Remove the item from the inventory
-                SetState(SlimeState.Healthy);
-                Debug.Log("Slime healed");
-
-                SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
-                if (slimeMovement != null)
-                {
-                    slimeMovement.MoveToExit();
-                }
-
-                itemSprite.SetActive(false);
-                isTimerActive = false; // Stop the timer when healed
-            }
-            else
-            {
-                Debug.Log("Character does not have the required item");
-            }
+            character.RemoveItem(requiredItem, 1);
+            StartHealing();
+            Debug.Log("Slime healing started by character: " + character.name);
         }
+        else
+        {
+            Debug.Log("Interaction failed: Character does not have the required item or slime is not interactable");
+        }
+    }
+
+    private void StartHealing()
+    {
+        isBeingHealed = true;
+        healingProgress = 0f;
+        isTimerActive = false;
+        Debug.Log("Healing process started");
+    }
+
+    private void CompleteHealing()
+    {
+        isBeingHealed = false;
+        SetState(SlimeState.Healthy);
+        Debug.Log("Slime healed and state set to Healthy");
+
+        SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
+        if (slimeMovement != null)
+        {
+            slimeMovement.MoveToExit();
+            Debug.Log("Slime is moving to exit");
+        }
+
+        itemSprite.SetActive(false);
     }
 
     private void ChooseRandomItem()
@@ -86,9 +113,8 @@ public class Slime : Interactable
         {
             int randomIndex = Random.Range(0, itemRequirement.possibleItems.Count);
             requiredItem = itemRequirement.possibleItems[randomIndex];
-            Debug.Log("Slime requires: " + requiredItem.Name);
+            Debug.Log("Slime requires item: " + requiredItem.Name);
 
-            // Set the sprite of the itemSprite GameObject to the icon of the required item
             SpriteRenderer itemSpriteRenderer = itemSprite.GetComponent<SpriteRenderer>();
             if (itemSpriteRenderer != null)
             {
@@ -103,26 +129,26 @@ public class Slime : Interactable
 
     private void RandomizeColor()
     {
-        // Generate a random hue value
         float hue = Random.Range(0f, 1f);
-        // Set saturation and value to ensure bright and vibrant colors
         float saturation = Random.Range(0.5f, 1f);
         float value = Random.Range(0.7f, 1f);
 
-        // Convert HSV to RGB and apply to the sprite renderer
         Color randomColor = Color.HSVToRGB(hue, saturation, value);
         spriteRenderer.color = randomColor;
+        Debug.Log("Slime color randomized to: " + randomColor);
     }
 
     public void SetInteractable(bool value)
     {
         isInteractable = value;
+        Debug.Log("Slime interactable set to: " + value);
     }
 
     public void SetState(SlimeState newState)
     {
         currentState = newState;
         UpdateSprite();
+        Debug.Log("Slime state updated to: " + currentState);
     }
 
     private void UpdateSprite()
@@ -136,6 +162,7 @@ public class Slime : Interactable
                 spriteRenderer.sprite = injuredSprite;
                 break;
         }
+        Debug.Log("Slime sprite updated to match state: " + currentState);
     }
 
     public SlimeState GetCurrentState()
@@ -146,14 +173,12 @@ public class Slime : Interactable
     public void ShowItemSprite() 
     {
         itemSprite.SetActive(true);
+        Debug.Log("Item sprite shown");
     }
 
     private void SlimeDies()
     {
         Debug.Log("Slime died due to timeout.");
-
-        // Add death animation or effects here if desired
-
-        Destroy(gameObject); // Remove the slime from the game
+        Destroy(gameObject);
     }
 }

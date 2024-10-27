@@ -16,4 +16,8 @@ public class Interactable : MonoBehaviour
     {
         Debug.Log("Interact with " + gameObject.name);
     }
+
+    public virtual void InteractHold(Character character) { }
+
+    public virtual void InteractReleased(Character character) { }
 }

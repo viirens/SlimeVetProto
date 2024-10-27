@@ -8,7 +8,7 @@ public class ToolsCharacterController : MonoBehaviour
     Rigidbody2D rgb2d;
     ToolbarController toolbarController;
     [SerializeField] float offsetDistance = 1f;
-    [SerializeField] float sizeOfInteractableArea = 1.2f;
+    // [SerializeField] float sizeOfInteractableArea = 1.2f;
     ToolsCharacterController charController;
 
     void Awake()
