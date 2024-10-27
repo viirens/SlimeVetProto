@@ -43,6 +43,16 @@ public class ToolbarController : MonoBehaviour
             }
             onChange?.Invoke(selectedToolIndex);
         }
+
+        for (int i = 0; i < toolbarSize; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                selectedToolIndex = i;
+                onChange?.Invoke(selectedToolIndex);
+                break;
+            }
+        }
     }
 
     public void Set(int id)

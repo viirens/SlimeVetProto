@@ -24,6 +24,32 @@ public class CharacterInteractController : MonoBehaviour
     {
         CheckForInteractableObjects();
 
+        if (Input.GetMouseButtonDown(1))
+        {
+            Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+            foreach (Collider2D collider in colliders)
+            {
+                Interactable interactable = collider.GetComponent<Interactable>();
+                if (interactable != null)
+                {
+                    if (!collider.CompareTag("Slime"))
+                    {
+                        Debug.Log(collider.CompareTag("Slime"));
+                        Debug.Log("Interacting initial");
+                        Interact();
+                    }
+                    else
+                    {
+                        Debug.Log("Interacting hold");
+                        InteractHold();
+                    }
+                    break;
+                }
+            }
+        }
+
         if (Input.GetMouseButton(1))
         {
             InteractHold();
@@ -46,7 +72,6 @@ public class CharacterInteractController : MonoBehaviour
             if (hit != null)
             {
                 highlightController.Highlight(hit.gameObject);
-                // highlightController.ShowProgressBar(0, 0, hit.gameObject.transform.position);
                 return;
             }
         }
