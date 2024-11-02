@@ -13,7 +13,52 @@ public class ResourceNode : ToolHit
     [SerializeField] Item item;
     [SerializeField] ResourceNodeType nodeType;
 
-    public override void Hit()
+    [SerializeField] float gatheringDuration = 3f;
+    private bool isBeingGathered = false;
+    private float gatheringProgress = 0f;
+    private HighlightController highlightController;
+
+    void Start()
+    {
+        highlightController = FindObjectOfType<HighlightController>();
+    }
+
+    public override void InteractHold(Character character)
+    {
+        if (!isBeingGathered)
+        {
+            isBeingGathered = true;
+            highlightController.ShowProgressBar(transform.position);
+        }
+
+        gatheringProgress += Time.deltaTime;
+        highlightController.UpdateProgressBar(gatheringProgress / gatheringDuration);
+
+        if (gatheringProgress >= gatheringDuration)
+        {
+            CompleteGathering();
+        }
+    }
+
+    public override void InteractReleased(Character character)
+    {
+        if (isBeingGathered)
+        {
+            isBeingGathered = false;
+            gatheringProgress = 0f;
+            highlightController.HideProgressBar();
+        }
+    }
+
+    private void CompleteGathering()
+    {
+        isBeingGathered = false;
+        DropResources();
+        highlightController.HideProgressBar();
+        Destroy(gameObject);
+    }
+
+    private void DropResources()
     {
         while (dropCount > 0)
         {
@@ -25,9 +70,6 @@ public class ResourceNode : ToolHit
 
             GameManager.instance.itemSpawnManager.SpawnItem(position, item, itemCountInOneDrop);
         }
-
-
-        Destroy(gameObject);
     }
 
     public override bool CanBeHit(List<ResourceNodeType> canBeHitByTool)

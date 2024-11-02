@@ -24,6 +24,7 @@ public class CharacterInteractController : MonoBehaviour
     {
         CheckForInteractableObjects();
 
+        // to consolidate
         if (Input.GetMouseButtonDown(1))
         {
             Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
@@ -36,13 +37,10 @@ public class CharacterInteractController : MonoBehaviour
                 {
                     if (!collider.CompareTag("Slime"))
                     {
-                        Debug.Log(collider.CompareTag("Slime"));
-                        Debug.Log("Interacting initial");
                         Interact();
                     }
                     else
                     {
-                        Debug.Log("Interacting hold");
                         InteractHold();
                     }
                     break;
