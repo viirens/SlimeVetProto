@@ -6,7 +6,6 @@ public class SlimeSpawner : MonoBehaviour
 {
     [Header("Slime Spawn Settings")]
     [SerializeField] private GameObject slimePrefab;
-    [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private float minSpawnInterval = 5f;
     [SerializeField] private float maxSpawnInterval = 10f;
 
@@ -32,14 +31,14 @@ public class SlimeSpawner : MonoBehaviour
 
     void SpawnSlime()
     {
-        if (spawnPoints.Length == 0 || slimePrefab == null)
+        if (GameManager.instance.entryWayPoints.Count == 0 || slimePrefab == null)
         {
             Debug.LogError("Spawn points or slime prefab not set up correctly.");
             return;
         }
 
-        int spawnIndex = Random.Range(0, spawnPoints.Length);
-        Transform spawnPoint = spawnPoints[spawnIndex];
+        int spawnIndex = Random.Range(0, GameManager.instance.entryWayPoints.Count);
+        Transform spawnPoint = GameManager.instance.entryWayPoints[spawnIndex];
 
         Instantiate(slimePrefab, spawnPoint.position, Quaternion.identity);
         // Debug.Log($"Spawned a slime at {spawnPoint.position} (Spawn Point Index: {spawnIndex}).");
