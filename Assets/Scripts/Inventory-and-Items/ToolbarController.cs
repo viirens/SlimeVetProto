@@ -63,7 +63,6 @@ public class ToolbarController : MonoBehaviour
     private void UpdateToolbar()
     {
         // Logic to update the toolbar UI based on the current inventory state
-        Debug.Log("Toolbar updated due to inventory change.");
         onChange?.Invoke(selectedToolIndex);
     }
 }

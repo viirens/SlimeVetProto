@@ -368,6 +368,12 @@ MonoBehaviour:
   obstacleAvoidanceDistance: 1
   hasArrived: 0
   isInteractable: 0
+  exitPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   waypointRadius: 5
 --- !u!114 &532818699629432841
 MonoBehaviour:

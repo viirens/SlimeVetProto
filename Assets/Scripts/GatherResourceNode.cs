@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ResourceNodeType { Undefined, Tree, Ore }
+public enum ResourceNodeType { Undefined, Tree, Ore, Herb }
 
 [CreateAssetMenu(fileName = "New Gather Resource Node", menuName = "Data/Gather Resource Node")]
 

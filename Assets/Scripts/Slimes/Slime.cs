@@ -45,7 +45,7 @@ public class Slime : Interactable
         isTimerActive = true;
 
         RandomizeColor();
-        Debug.Log("Slime initialized with state: " + currentState);
+        // Debug.Log("Slime initialized with state: " + currentState);
 
         highlightController = FindObjectOfType<HighlightController>();
     }
@@ -68,7 +68,7 @@ public class Slime : Interactable
         {
             character.RemoveItem(requiredItem, 1);
             StartHealing();
-            Debug.Log("Slime healing started by character: " + character.name);
+            // Debug.Log("Slime healing started by character: " + character.name);
         }
         else
         {
@@ -83,7 +83,7 @@ public class Slime : Interactable
             Debug.Log("InteractHold called");
             if (!isBeingHealed)
             {
-                Debug.Log("InteractHold called and isBeingHealed is false");
+                // Debug.Log("InteractHold called and isBeingHealed is false");
                 character.RemoveItem(requiredItem, 1);
                 isBeingHealed = true;
                 isTimerActive = false;
@@ -127,13 +127,13 @@ public class Slime : Interactable
     {
         isBeingHealed = false;
         SetState(SlimeState.Healthy);
-        Debug.Log("Healing complete: Slime state set to Healthy.");
+        // Debug.Log("Healing complete: Slime state set to Healthy.");
 
         SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
         if (slimeMovement != null)
         {
             slimeMovement.MoveToExit();
-            Debug.Log("Slime is moving to exit.");
+            // Debug.Log("Slime is moving to exit.");
         }
 
         itemSprite.SetActive(false);
@@ -146,7 +146,7 @@ public class Slime : Interactable
         {
             int randomIndex = Random.Range(0, itemRequirement.possibleItems.Count);
             requiredItem = itemRequirement.possibleItems[randomIndex];
-            Debug.Log("Slime requires item: " + requiredItem.Name);
+            // Debug.Log("Slime requires item: " + requiredItem.Name);
 
             SpriteRenderer itemSpriteRenderer = itemSprite.GetComponent<SpriteRenderer>();
             if (itemSpriteRenderer != null)
@@ -168,20 +168,20 @@ public class Slime : Interactable
 
         Color randomColor = Color.HSVToRGB(hue, saturation, value);
         spriteRenderer.color = randomColor;
-        Debug.Log("Slime color randomized to: " + randomColor);
+        // Debug.Log("Slime color randomized to: " + randomColor);
     }
 
     public void SetInteractable(bool value)
     {
         isInteractable = value;
-        Debug.Log("Slime interactable set to: " + value);
+        // Debug.Log("Slime interactable set to: " + value);
     }
 
     public void SetState(SlimeState newState)
     {
         currentState = newState;
         UpdateSprite();
-        Debug.Log("Slime state updated to: " + currentState);
+        // Debug.Log("Slime state updated to: " + currentState);
     }
 
     private void UpdateSprite()
@@ -195,7 +195,7 @@ public class Slime : Interactable
                 spriteRenderer.sprite = injuredSprite;
                 break;
         }
-        Debug.Log("Slime sprite updated to match state: " + currentState);
+        // Debug.Log("Slime sprite updated to match state: " + currentState);
     }
 
     public SlimeState GetCurrentState()
@@ -206,7 +206,7 @@ public class Slime : Interactable
     public void ShowItemSprite() 
     {
         itemSprite.SetActive(true);
-        Debug.Log("Item sprite shown");
+        // Debug.Log("Item sprite shown");
     }
 
     private void SlimeDies()

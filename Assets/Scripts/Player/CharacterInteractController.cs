@@ -17,7 +17,6 @@ public class CharacterInteractController : MonoBehaviour
         characterController = GetComponent<CharacterController2D>();
         rgb2d = GetComponent<Rigidbody2D>();
         character = GetComponent<Character>();
-        Debug.Log(character);
     }
 
     void Update()
@@ -64,17 +63,30 @@ public class CharacterInteractController : MonoBehaviour
         Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
 
+        Interactable closestInteractable = null;
+
         foreach (Collider2D collider in colliders)
         {
+            // there should be some priority between interactable objects if there are multiple within range we should always select the closest
             Interactable hit = collider.GetComponent<Interactable>();
             if (hit != null)
             {
-                highlightController.Highlight(hit.gameObject);
-                return;
+                // if the object is closer than the current closest, highlight it
+                if (closestInteractable == null || Vector2.Distance(transform.position, hit.transform.position) < Vector2.Distance(transform.position, closestInteractable.transform.position))
+                {
+                    closestInteractable = hit;
+                }
             }
         }
-        
-        highlightController.Hide();
+
+        if (closestInteractable != null)
+        {
+            highlightController.Highlight(closestInteractable.gameObject);
+        }
+        else
+        {
+            highlightController.Hide();
+        }
     }
 
     void Interact()

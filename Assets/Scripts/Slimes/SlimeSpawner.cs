@@ -23,7 +23,7 @@ public class SlimeSpawner : MonoBehaviour
         while (spawning)
         {
             float spawnDelay = Random.Range(minSpawnInterval, maxSpawnInterval);
-            Debug.Log($"Next slime will spawn in {spawnDelay} seconds.");
+            // Debug.Log($"Next slime will spawn in {spawnDelay} seconds.");
             yield return new WaitForSeconds(spawnDelay);
 
             SpawnSlime();
@@ -42,6 +42,6 @@ public class SlimeSpawner : MonoBehaviour
         Transform spawnPoint = spawnPoints[spawnIndex];
 
         Instantiate(slimePrefab, spawnPoint.position, Quaternion.identity);
-        Debug.Log($"Spawned a slime at {spawnPoint.position} (Spawn Point Index: {spawnIndex}).");
+        // Debug.Log($"Spawned a slime at {spawnPoint.position} (Spawn Point Index: {spawnIndex}).");
     }
 }

@@ -63,6 +63,8 @@ public class HighlightController : MonoBehaviour
 
     public void ShowProgressBar(Vector3 position)
     {
+        // should remove highlight if present
+        highlighter.SetActive(false);
         progressBar.SetActive(true);
         progressBar.transform.position = position;
         UpdateProgressBar(0f);

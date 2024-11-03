@@ -16,6 +16,7 @@ public class SlimeMovement : MonoBehaviour
     private LineRenderer lineRenderer;
     public bool isInteractable = false; // Add this flag to track interactability
     private Transform waypoint; // Declare the waypoint variable
+    [SerializeField] private Transform[] exitPoints;
 
     // Add this variable
     [SerializeField] private float waypointRadius = 10f; // Radius around the waypoint for slimes to pick positions
@@ -40,7 +41,7 @@ public class SlimeMovement : MonoBehaviour
         if (waypointObject != null)
         {
             waypoint = waypointObject.transform;
-            Debug.Log("Waypoint found: " + waypointObject.name);
+            // Debug.Log("Waypoint found: " + waypointObject.name);
         }
         else
         {
@@ -114,7 +115,7 @@ public class SlimeMovement : MonoBehaviour
                 SetInteractableState(!isExiting); // Update interactability based on exiting state
                 if (isExiting)
                 {
-                    Debug.Log("Arrived at exit");
+                    // Debug.Log("Arrived at exit");
                 }
                 else
                 {
@@ -123,7 +124,7 @@ public class SlimeMovement : MonoBehaviour
                     {
                         slime.ShowItemSprite(); // Show the item sprite when arriving at the waypoint
                     }
-                    Debug.Log("Arrived at waypoint");
+                    // Debug.Log("Arrived at waypoint");
                 }
             }
         }

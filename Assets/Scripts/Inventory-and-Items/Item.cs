@@ -10,4 +10,5 @@ public class Item : ScriptableObject
     public Sprite Icon;
     public bool Stackable;
     public ToolAction onAction;
+    [SerializeField] public ResourceNodeType resourceNodeType;
 }
