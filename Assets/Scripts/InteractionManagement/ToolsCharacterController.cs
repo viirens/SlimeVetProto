@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class ToolsCharacterController : MonoBehaviour
     ToolbarController toolbarController;
     [SerializeField] float offsetDistance = 1f;
     [SerializeField] float sizeOfInteractableArea = 1.2f;
+    ToolsCharacterController charController;
 
     void Awake()
     {
@@ -18,60 +20,36 @@ public class ToolsCharacterController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(0))
         {
-            InteractHold();
-        }
-
-        if (Input.GetMouseButton(1))
-        {
-            InteractHold();
-        }
-
-        if (Input.GetMouseButtonUp(1))
-        {
-            InteractReleased();
+            UseTool();
         }
     }
 
-    void InteractHold()
+    private bool UseTool()
     {
         Vector2 position = rgb2d.position + character.lastMotionVector * offsetDistance;
+
+        // Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+        // foreach (Collider2D collider in colliders)
+        // {
+        //     ToolHit toolHit = collider.GetComponent<ToolHit>();
+        //     if (toolHit != null)
+        //     {
+        //         Vector2 directionToCollider = (collider.transform.position - transform.position).normalized;
+        //         if (Vector2.Dot(character.lastMotionVector, directionToCollider) > 0.5f) // Check if facing the object
+        //         {
+        //             toolHit.Hit();
+        //             break;
+        //         }
+        //     }
+        
         Item item = toolbarController.GetItem;
-        if (item == null) { return; }
-        ToolAction onAction = item.onAction;
-        if (onAction == null) { return; }
+        if (item == null) { return false; }
+        if (item.onAction == null) { return false; }
 
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
-
-        foreach (Collider2D collider in colliders)
-        {
-            ToolHit toolHit = collider.GetComponent<ToolHit>();
-            if (toolHit != null)
-            {
-                if (toolHit.CanBeHit(onAction.GetResourceNodeTypes()))
-                {
-                    toolHit.InteractHold(null);
-                    break;
-                }
-            }
-        }
-    }
-
-    void InteractReleased()
-    {
-        Vector2 position = rgb2d.position + character.lastMotionVector * offsetDistance;
-
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
-
-        foreach (Collider2D collider in colliders)
-        {
-            ToolHit toolHit = collider.GetComponent<ToolHit>();
-            if (toolHit != null)
-            {
-                toolHit.InteractReleased(null);
-                break;
-            }
-        }
+        bool complete = item.onAction.OnApply(position);
+        return complete;
     }
 }

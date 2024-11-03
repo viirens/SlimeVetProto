@@ -13,14 +13,4 @@ public class ToolHit : MonoBehaviour
     {
         return true;
     }
-
-    public virtual void InteractHold(Character character)
-    {
-        // Default implementation (can be empty)
-    }
-
-    public virtual void InteractReleased(Character character)
-    {
-        // Default implementation (can be empty)
-    }
 }
