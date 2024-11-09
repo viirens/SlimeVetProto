@@ -84,17 +84,18 @@ public class Slime : Interactable
             if (!isBeingHealed)
             {
                 // Debug.Log("InteractHold called and isBeingHealed is false");
-                character.RemoveItem(requiredItem, 1);
+                
                 isBeingHealed = true;
                 isTimerActive = false;
-                highlightController.ShowProgressBar(transform.position);
+                highlightController.ShowProgressBar(gameObject, transform.position);
             }
 
             healingProgress += Time.deltaTime;
-            highlightController.UpdateProgressBar(healingProgress / healingDuration);
+            highlightController.UpdateProgressBar(gameObject, healingProgress / healingDuration);
 
             if (healingProgress >= healingDuration)
             {
+                character.RemoveItem(requiredItem, 1);
                 CompleteHealing();
             }
         }
@@ -111,7 +112,7 @@ public class Slime : Interactable
             isBeingHealed = false;
             healingProgress = 0f;
             isTimerActive = true;
-            highlightController.HideProgressBar();
+            highlightController.HideProgressBar(gameObject);
         }
     }
 
@@ -137,7 +138,7 @@ public class Slime : Interactable
         }
 
         itemSprite.SetActive(false);
-        highlightController.HideProgressBar();
+        highlightController.RemoveProgressBar(gameObject);
     }
 
     private void ChooseRandomItem()
@@ -213,5 +214,10 @@ public class Slime : Interactable
     {
         Debug.Log("Slime died due to timeout.");
         Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        highlightController.RemoveProgressBar(gameObject);
     }
 }

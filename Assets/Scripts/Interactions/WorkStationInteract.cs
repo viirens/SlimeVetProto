@@ -9,14 +9,20 @@ public class WorkStationInteract : Interactable
     [SerializeField] private GameObject itemSlotSpriteOne;
     [SerializeField] private GameObject itemSlotSpriteTwo;
 
+    private bool isCooking = false;
+    [SerializeField] private float cookingTime = 5f;
+
+    private HighlightController highlightController;
+
     void Start()
     {
         isInteractable = true;
+        highlightController = FindObjectOfType<HighlightController>();
     }
 
     public override void Interact(Character character)
     {
-        switch(workStationType)
+        switch (workStationType)
         {
             case WorkStationType.Fireplace:
                 InteractWithFireplace(character);
@@ -44,16 +50,20 @@ public class WorkStationInteract : Interactable
     {
         Item selectedItem = character.GetSelectedItem();
 
-        Debug.Log("Selected item: " + selectedItem.Name + " Resource node type: " + selectedItem.resourceNodeType);
-        if (selectedItem != null && (workStationType == WorkStationType.Fireplace && selectedItem.resourceNodeType == ResourceNodeType.Tree || workStationType == WorkStationType.Fireplace && selectedItem.resourceNodeType == ResourceNodeType.Herb) || (workStationType == WorkStationType.Stovetop && selectedItem.resourceNodeType == ResourceNodeType.Ore || workStationType == WorkStationType.Stovetop && selectedItem.resourceNodeType == ResourceNodeType.Herb))
+        if (selectedItem != null &&
+            ((workStationType == WorkStationType.Fireplace && (selectedItem.resourceNodeType == ResourceNodeType.Tree || selectedItem.resourceNodeType == ResourceNodeType.Herb)) ||
+             (workStationType == WorkStationType.Stovetop && (selectedItem.resourceNodeType == ResourceNodeType.Ore || selectedItem.resourceNodeType == ResourceNodeType.Herb))))
         {
             bool added = itemContainer.Add(selectedItem, 1);
             if (added)
             {
                 SpriteRenderer itemSpriteRenderer = null;
-                if (itemSlotSpriteOne.GetComponent<SpriteRenderer>().sprite == null) {
+                if (itemSlotSpriteOne.GetComponent<SpriteRenderer>().sprite == null)
+                {
                     itemSpriteRenderer = itemSlotSpriteOne.GetComponent<SpriteRenderer>();
-                } else if (itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite == null) {
+                }
+                else if (itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite == null)
+                {
                     itemSpriteRenderer = itemSlotSpriteTwo.GetComponent<SpriteRenderer>();
                 }
                 if (itemSpriteRenderer != null)
@@ -63,15 +73,64 @@ public class WorkStationInteract : Interactable
                 }
                 character.RemoveItem(selectedItem, 1);
             }
-        } else {
+        }
+        else
+        {
             Debug.Log("Invalid item for workstation");
         }
     }
 
-    public void ShowItemSprite() 
+    public void ShowItemSprite()
     {
         itemSlotSpriteOne.SetActive(true);
         itemSlotSpriteTwo.SetActive(true);
+    }
+
+    private void Update()
+    {
+        if (!isCooking && itemContainer.slots.Count == 2 && itemContainer.slots[0].item != null && itemContainer.slots[1].item != null)
+        {
+            StartCooking();
+            Debug.Log("Showing progress bar");
+            highlightController.ShowProgressBar(gameObject, transform.position);
+        }
+    }
+
+    public void StartCooking()
+    {
+        isCooking = true;
+        StartCoroutine(CookingCoroutine());
+    }
+
+    private IEnumerator CookingCoroutine()
+    {
+        float currentCookingTime = 0f;
+        while (isCooking)
+        {
+            currentCookingTime += Time.deltaTime;
+            highlightController.UpdateProgressBar(gameObject, currentCookingTime / cookingTime);
+
+            if (currentCookingTime >= cookingTime)
+            {
+                isCooking = false;
+                currentCookingTime = 0f;
+                highlightController.RemoveProgressBar(gameObject);
+
+                // Clear the items
+                itemContainer.slots[0].item = null;
+                itemContainer.slots[1].item = null;
+
+                // Clear the item sprites
+                itemSlotSpriteOne.GetComponent<SpriteRenderer>().sprite = null;
+                itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite = null;
+            }
+            yield return null;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        highlightController.RemoveProgressBar(gameObject);
     }
 }
 

@@ -16,7 +16,11 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         entryWayPoints = new List<Transform>(GameObject.Find("SpawnLocations").GetComponentsInChildren<Transform>());
+        entryWayPoints.Remove(GameObject.Find("SpawnLocations").transform);
+
         exitWayPoints = new List<Transform>(GameObject.Find("ExitLocations").GetComponentsInChildren<Transform>());
+        exitWayPoints.Remove(GameObject.Find("ExitLocations").transform);
+
         Debug.Log("Entry waypoints: " + entryWayPoints.Count);
         Debug.Log("Exit waypoints: " + exitWayPoints.Count);
     }
