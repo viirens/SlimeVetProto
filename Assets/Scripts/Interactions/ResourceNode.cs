@@ -15,6 +15,7 @@ public class ResourceNode : ToolHit
 
     public override void Hit()
     {
+        Debug.Log("Hitting resource node");
         while (dropCount > 0)
         {
             dropCount--;
@@ -26,9 +27,41 @@ public class ResourceNode : ToolHit
             GameManager.instance.itemSpawnManager.SpawnItem(position, item, itemCountInOneDrop);
         }
 
-
         Destroy(gameObject);
     }
+
+    // public override void HitHold()
+    // {
+    //     StartCoroutine(HitCoroutine());
+    //     isBeingHit = true;
+    //     highlightController.ShowProgressBar(gameObject, transform.position);
+    // }
+
+    // private IEnumerator HitCoroutine()
+    // {
+    //     hitProgress += Time.deltaTime;
+    //     Debug.Log(gameObject);
+    //     highlightController.UpdateProgressBar(gameObject, hitProgress / hitTime);
+    //     Debug.Log("Hit progress: " + hitProgress);
+    //     Debug.Log("Hit time: " + hitTime);
+    //     if (hitProgress >= hitTime)
+    //     {
+    //         isBeingHit = false;
+    //         hitProgress = 0f;
+    //         highlightController.RemoveProgressBar(gameObject);
+    //         Hit();
+    //     }
+    //     yield return null;
+    // }
+
+    // public override void InteractReleased(Character character)
+    // {
+    //     if (isBeingHit)
+    //     {
+    //         isBeingHit = false;
+    //         hitProgress = 0f;
+    //     }
+    // }
 
     public override bool CanBeHit(List<ResourceNodeType> canBeHitByTool)
     {

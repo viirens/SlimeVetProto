@@ -9,7 +9,7 @@ public enum ResourceNodeType { Undefined, Tree, Ore, Herb }
 public class GatherResourceNode : ToolAction
 {
     [SerializeField] float sizeOfInteractableArea = 1.2f;
-    [SerializeField] List<ResourceNodeType> canHitNodesOfType;
+    [SerializeField] public List<ResourceNodeType> canHitNodesOfType;
     public override bool OnApply(Vector2 position)
     {
 

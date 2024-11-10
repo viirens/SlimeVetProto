@@ -14,17 +14,21 @@ public class WorkStationInteract : Interactable
 
     private HighlightController highlightController;
 
+    [SerializeField] private Item cookedItem;
+    private Character character;
+
     void Start()
     {
         isInteractable = true;
         highlightController = FindObjectOfType<HighlightController>();
+        character = FindObjectOfType<Character>();
     }
 
     public override void Interact(Character character)
     {
         switch (workStationType)
         {
-            case WorkStationType.Fireplace:
+            case WorkStationType.Fireplace: 
                 InteractWithFireplace(character);
                 break;
             case WorkStationType.Stovetop:
@@ -123,6 +127,11 @@ public class WorkStationInteract : Interactable
                 // Clear the item sprites
                 itemSlotSpriteOne.GetComponent<SpriteRenderer>().sprite = null;
                 itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite = null;
+
+                // Add the cooked item to the player's inventory
+                Debug.Log(character);
+                // character.AddItem(cookedItem, 1);
+                GameManager.instance.itemSpawnManager.SpawnItem(gameObject.transform.position, cookedItem, 1);
             }
             yield return null;
         }

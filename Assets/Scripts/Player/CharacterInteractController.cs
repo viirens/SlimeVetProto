@@ -22,10 +22,12 @@ public class CharacterInteractController : MonoBehaviour
     void Update()
     {
         CheckForInteractableObjects();
+        // Debug.Log("Interacting with object");
 
         // to consolidate
         if (Input.GetMouseButtonDown(1))
         {
+            
             Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
             Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
 
