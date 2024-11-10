@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public List<Transform> entryWayPoints;
     public List<Transform> exitWayPoints;
+    public TextMeshProUGUI slimesHealedText;
+    private int slimesHealed = 0;
 
     private void Awake()
     {
@@ -29,4 +32,15 @@ public class GameManager : MonoBehaviour
     public ItemContainer inventoryContainer;
     public ItemDragAndDropController itemDragAndDropController;
     public ItemSpawnManager itemSpawnManager;
+
+    public void IncrementSlimesHealed()
+    {
+        slimesHealed++;
+        UpdateSlimesHealedUI();
+    }
+
+    void UpdateSlimesHealedUI()
+    {
+        slimesHealedText.text = "Slimes Healed: " + slimesHealed;
+    }
 }

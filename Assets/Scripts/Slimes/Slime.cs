@@ -32,6 +32,8 @@ public class Slime : Interactable
 
     private HighlightController highlightController;
 
+    private Character interactingCharacter;
+
     void Start()
     {
         requiresOverlap = customRequiresOverlap;
@@ -60,6 +62,11 @@ public class Slime : Interactable
                 SlimeDies();
             }
         }
+
+        if (isBeingHealed && !IsCharacterInRange())
+        {
+            CancelHealing();
+        }
     }
 
     public override void Interact(Character character)
@@ -80,13 +87,11 @@ public class Slime : Interactable
     {
         if (isInteractable && currentState == SlimeState.Injured && character.HasItem(requiredItem))
         {
-            Debug.Log("InteractHold called");
             if (!isBeingHealed)
             {
-                // Debug.Log("InteractHold called and isBeingHealed is false");
-                
                 isBeingHealed = true;
                 isTimerActive = false;
+                interactingCharacter = character;
                 highlightController.ShowProgressBar(gameObject, transform.position);
             }
 
@@ -101,19 +106,13 @@ public class Slime : Interactable
         }
         else
         {
-            Debug.Log("InteractHold failed: Slime not interactable or character lacks required item.");
+            CancelHealing();
         }
     }
 
     public override void InteractReleased(Character character)
     {
-        if (isBeingHealed)
-        {
-            isBeingHealed = false;
-            healingProgress = 0f;
-            isTimerActive = true;
-            highlightController.HideProgressBar(gameObject);
-        }
+        CancelHealing();
     }
 
     private void StartHealing()
@@ -124,7 +123,7 @@ public class Slime : Interactable
         Debug.Log("Healing process started");
     }
 
-    private void CompleteHealing()
+    public void CompleteHealing()
     {
         isBeingHealed = false;
         SetState(SlimeState.Healthy);
@@ -139,6 +138,9 @@ public class Slime : Interactable
 
         itemSprite.SetActive(false);
         highlightController.RemoveProgressBar(gameObject);
+
+        // Increment the slimes healed count
+        GameManager.instance.IncrementSlimesHealed();
     }
 
     private void ChooseRandomItem()
@@ -219,5 +221,29 @@ public class Slime : Interactable
     private void OnDestroy()
     {
         highlightController.RemoveProgressBar(gameObject);
+    }
+
+    private void CancelHealing()
+    {
+        if (isBeingHealed)
+        {
+            isBeingHealed = false;
+            healingProgress = 0f;
+            isTimerActive = true;
+            interactingCharacter = null;
+            highlightController.RemoveProgressBar(gameObject);
+        }
+    }
+
+    private bool IsCharacterInRange()
+    {
+        if (interactingCharacter == null)
+            return false;
+
+        CharacterInteractController interactController = interactingCharacter.GetComponent<CharacterInteractController>();
+        if (interactController == null)
+            return false;
+
+        return interactController.CurrentInteractable == this;
     }
 }

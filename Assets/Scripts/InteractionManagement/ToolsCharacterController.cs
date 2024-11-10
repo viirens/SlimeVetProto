@@ -66,7 +66,7 @@ public class ToolsCharacterController : MonoBehaviour
         GameObject newTarget = GetInRangeResourceNode(canHitNodesOfType);
         Debug.Log(newTarget);
 
-        if (!isToolHeld)
+        if (!isToolHeld )
         {
             if (newTarget != null)
             {
@@ -75,8 +75,23 @@ public class ToolsCharacterController : MonoBehaviour
                 highlightController.ShowProgressBar(currentTarget, currentTarget.transform.position);
                 isToolHeld = true;
                 toolHoldProgress = 0f;
-            }
-        }   
+            } 
+        }
+
+        if (newTarget != null && currentTarget != newTarget)
+        {
+            highlightController.RemoveProgressBar(currentTarget);
+            toolHoldProgress = 0f;
+            currentTarget = newTarget;
+            highlightController.ShowProgressBar(currentTarget, currentTarget.transform.position);
+        }
+
+        if (newTarget == null && currentTarget != null)
+        {
+            highlightController.RemoveProgressBar(currentTarget);
+            isToolHeld = false;
+            toolHoldProgress = 0f;
+        }
 
         toolHoldProgress += Time.deltaTime;
         if (currentTarget != null)
@@ -127,7 +142,7 @@ public class ToolsCharacterController : MonoBehaviour
                 }
             }
         }
-        return null;
+        return null;    
     }
 
     private List<ResourceNodeType> GetCanHitNodesOfType(ToolAction toolAction)

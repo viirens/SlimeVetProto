@@ -12,6 +12,8 @@ public class CharacterInteractController : MonoBehaviour
     Character character;
     [SerializeReference] HighlightController highlightController;
 
+    public Interactable CurrentInteractable { get; private set; }
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController2D>();
@@ -69,11 +71,9 @@ public class CharacterInteractController : MonoBehaviour
 
         foreach (Collider2D collider in colliders)
         {
-            // there should be some priority between interactable objects if there are multiple within range we should always select the closest
             Interactable hit = collider.GetComponent<Interactable>();
             if (hit != null)
             {
-                // if the object is closer than the current closest, highlight it
                 if (closestInteractable == null || Vector2.Distance(transform.position, hit.transform.position) < Vector2.Distance(transform.position, closestInteractable.transform.position))
                 {
                     closestInteractable = hit;
@@ -84,10 +84,12 @@ public class CharacterInteractController : MonoBehaviour
         if (closestInteractable != null)
         {
             highlightController.Highlight(closestInteractable.gameObject);
+            CurrentInteractable = closestInteractable;
         }
         else
         {
             highlightController.Hide();
+            CurrentInteractable = null;
         }
     }
 
