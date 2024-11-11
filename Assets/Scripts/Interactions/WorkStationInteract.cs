@@ -34,6 +34,9 @@ public class WorkStationInteract : Interactable
             case WorkStationType.Stovetop:
                 InteractWithStovetop(character);
                 break;
+            case WorkStationType.Woodcutter:
+                InteractWithWoodcutter(character);
+                break;
             default:
                 Debug.Log("Interacted with unknown workstation");
                 break;
@@ -50,13 +53,20 @@ public class WorkStationInteract : Interactable
         TransferItemToContainer(character);
     }
 
+    private void InteractWithWoodcutter(Character character)
+    {
+        TransferItemToContainer(character);
+    }
+
     private void TransferItemToContainer(Character character)
     {
         Item selectedItem = character.GetSelectedItem();
 
         if (selectedItem != null &&
             ((workStationType == WorkStationType.Fireplace && (selectedItem.resourceNodeType == ResourceNodeType.Tree || selectedItem.resourceNodeType == ResourceNodeType.Herb)) ||
-             (workStationType == WorkStationType.Stovetop && (selectedItem.resourceNodeType == ResourceNodeType.Ore || selectedItem.resourceNodeType == ResourceNodeType.Herb))))
+             (workStationType == WorkStationType.Stovetop && (selectedItem.resourceNodeType == ResourceNodeType.Ore || selectedItem.resourceNodeType == ResourceNodeType.Herb)) ||
+             (workStationType == WorkStationType.Woodcutter && selectedItem.resourceNodeType == ResourceNodeType.Tree))
+        )
         {
             bool added = itemContainer.Add(selectedItem, 1);
             if (added)
@@ -66,7 +76,7 @@ public class WorkStationInteract : Interactable
                 {
                     itemSpriteRenderer = itemSlotSpriteOne.GetComponent<SpriteRenderer>();
                 }
-                else if (itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite == null)
+                else if (workStationType != WorkStationType.Woodcutter && itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite == null)
                 {
                     itemSpriteRenderer = itemSlotSpriteTwo.GetComponent<SpriteRenderer>();
                 }
@@ -87,16 +97,28 @@ public class WorkStationInteract : Interactable
     public void ShowItemSprite()
     {
         itemSlotSpriteOne.SetActive(true);
-        itemSlotSpriteTwo.SetActive(true);
+        if (workStationType != WorkStationType.Woodcutter)
+        {
+            itemSlotSpriteTwo.SetActive(true);
+        }
     }
 
     private void Update()
     {
-        if (!isCooking && itemContainer.slots.Count == 2 && itemContainer.slots[0].item != null && itemContainer.slots[1].item != null)
+        if (!isCooking)
         {
-            StartCooking();
-            Debug.Log("Showing progress bar");
-            highlightController.ShowProgressBar(gameObject, transform.position);
+            if (workStationType == WorkStationType.Woodcutter && itemContainer.slots.Count >= 1 && itemContainer.slots[0].item != null)
+            {
+                StartCooking();
+                Debug.Log("Showing progress bar");
+                highlightController.ShowProgressBar(gameObject, transform.position);
+            }
+            else if (itemContainer.slots.Count >= 2 && itemContainer.slots[0].item != null && itemContainer.slots[1].item != null)
+            {
+                StartCooking();
+                Debug.Log("Showing progress bar");
+                highlightController.ShowProgressBar(gameObject, transform.position);
+            }
         }
     }
 
@@ -120,17 +142,19 @@ public class WorkStationInteract : Interactable
                 currentCookingTime = 0f;
                 highlightController.RemoveProgressBar(gameObject);
 
-                // Clear the items
                 itemContainer.slots[0].item = null;
-                itemContainer.slots[1].item = null;
+                if (workStationType != WorkStationType.Woodcutter)
+                {
+                    itemContainer.slots[1].item = null;
+                }
 
-                // Clear the item sprites
                 itemSlotSpriteOne.GetComponent<SpriteRenderer>().sprite = null;
-                itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite = null;
+                if (workStationType != WorkStationType.Woodcutter)
+                {
+                    itemSlotSpriteTwo.GetComponent<SpriteRenderer>().sprite = null;
+                }
 
-                // Add the cooked item to the player's inventory
                 Debug.Log(character);
-                // character.AddItem(cookedItem, 1);
                 GameManager.instance.itemSpawnManager.SpawnItem(gameObject.transform.position, cookedItem, 1);
             }
             yield return null;
@@ -146,7 +170,8 @@ public class WorkStationInteract : Interactable
 public enum WorkStationType
 {
     Fireplace,
-    Stovetop
+    Stovetop,
+    Woodcutter
 }
 
 public enum FireplaceRequiredItem

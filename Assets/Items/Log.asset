@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0f81a1ca67544b079c34c69f0d1c5f3, type: 3}
-  m_Name: New Item
+  m_Name: Log
   m_EditorClassIdentifier: 
-  Name: 
+  Name: Log
   Description: 
-  Icon: {fileID: 0}
-  Stackable: 0
+  Icon: {fileID: -868781085, guid: 1b180e69a49ce4d3cb0ddbd422e5e2bb, type: 3}
+  Stackable: 1
   onAction: {fileID: 0}
+  resourceNodeType: 1
