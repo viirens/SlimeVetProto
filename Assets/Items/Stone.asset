@@ -17,4 +17,5 @@ MonoBehaviour:
   Icon: {fileID: 21300000, guid: ab7c2d4835b19423aa77fc903601492b, type: 3}
   Stackable: 1
   onAction: {fileID: 0}
+  tier: 1
   resourceNodeType: 2

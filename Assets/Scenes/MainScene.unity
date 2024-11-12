@@ -9257,8 +9257,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slimePrefab: {fileID: 4691374592135109779, guid: f7af5512ce7f1454293bfd958bb4646e, type: 3}
-  minSpawnInterval: 5
-  maxSpawnInterval: 10
+  waves:
+  - slimeCount: 3
+    spawnInterval: 4
+    itemTier: 1
+  - slimeCount: 5
+    spawnInterval: 4
+    itemTier: 2
+  - slimeCount: 7
+    spawnInterval: 4
+    itemTier: 3
 --- !u!114 &1536500602
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -34,6 +34,8 @@ public class Slime : Interactable
 
     private Character interactingCharacter;
 
+    private int itemTier = 1;
+
     void Start()
     {
         requiresOverlap = customRequiresOverlap;
@@ -41,15 +43,14 @@ public class Slime : Interactable
         UpdateSprite();
         itemSprite.SetActive(false); 
 
-        ChooseRandomItem();
-
         timer = timeToLive;
         isTimerActive = true;
 
         RandomizeColor();
-        // Debug.Log("Slime initialized with state: " + currentState);
 
         highlightController = FindObjectOfType<HighlightController>();
+
+        ChooseRandomItem();
     }
 
     void Update()
@@ -147,18 +148,19 @@ public class Slime : Interactable
     {
         if (itemRequirement != null && itemRequirement.possibleItems.Count > 0)
         {
-            int randomIndex = Random.Range(0, itemRequirement.possibleItems.Count);
-            requiredItem = itemRequirement.possibleItems[randomIndex];
-            // Debug.Log("Slime requires item: " + requiredItem.Name);
+            Debug.Log("Choosing random item for slime with tier: " + itemTier);
+            List<Item> tieredItems = itemRequirement.GetItemsByTier(itemTier);
+            Debug.Log("Tiered items count: " + tieredItems.Count);
+            if (tieredItems.Count == 0)
+                tieredItems = itemRequirement.possibleItems;
+
+            int randomIndex = Random.Range(0, tieredItems.Count);
+            requiredItem = tieredItems[randomIndex];
 
             SpriteRenderer itemSpriteRenderer = itemSprite.GetComponent<SpriteRenderer>();
             if (itemSpriteRenderer != null)
             {
                 itemSpriteRenderer.sprite = requiredItem.Icon;
-            }
-            else
-            {
-                Debug.LogError("Item sprite GameObject does not have a SpriteRenderer component.");
             }
         }
     }
@@ -245,5 +247,10 @@ public class Slime : Interactable
             return false;
 
         return interactController.CurrentInteractable == this;
+    }
+
+    public void SetItemTier(int tier)
+    {
+        itemTier = tier;
     }
 }
