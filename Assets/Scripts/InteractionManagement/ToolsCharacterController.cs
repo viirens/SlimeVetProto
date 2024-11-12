@@ -64,7 +64,6 @@ public class ToolsCharacterController : MonoBehaviour
         if (item == null) { return false; }
         List<ResourceNodeType> canHitNodesOfType = GetCanHitNodesOfType(item.onAction);
         GameObject newTarget = GetInRangeResourceNode(canHitNodesOfType);
-        Debug.Log(newTarget);
 
         if (!isToolHeld )
         {

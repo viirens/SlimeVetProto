@@ -62,6 +62,7 @@ public class WorkStationInteract : Interactable
     {
         Item selectedItem = character.GetSelectedItem();
 
+        
         if (selectedItem != null &&
             ((workStationType == WorkStationType.Fireplace && (selectedItem.resourceNodeType == ResourceNodeType.Tree || selectedItem.resourceNodeType == ResourceNodeType.Herb)) ||
              (workStationType == WorkStationType.Stovetop && (selectedItem.resourceNodeType == ResourceNodeType.Ore || selectedItem.resourceNodeType == ResourceNodeType.Herb)) ||
@@ -115,9 +116,17 @@ public class WorkStationInteract : Interactable
             }
             else if (itemContainer.slots.Count >= 2 && itemContainer.slots[0].item != null && itemContainer.slots[1].item != null)
             {
-                StartCooking();
-                Debug.Log("Showing progress bar");
-                highlightController.ShowProgressBar(gameObject, transform.position);
+                Debug.Log(itemContainer.slots[0].item.name + " " + itemContainer.slots[1].item.name);
+                if (CheckRecipe(itemContainer.slots[0].item, itemContainer.slots[1].item))
+                {
+                    StartCooking();
+                    Debug.Log("Showing progress bar");
+                    highlightController.ShowProgressBar(gameObject, transform.position);
+                }
+                else
+                {
+                    Debug.Log("Invalid recipe");
+                }
             }
         }
     }
@@ -164,6 +173,29 @@ public class WorkStationInteract : Interactable
     private void OnDestroy()
     {
         highlightController.RemoveProgressBar(gameObject);
+    }
+
+    private bool CheckRecipe(Item item1, Item item2)
+    {
+        Debug.Log(item1.name + " " + item2.name);
+        Debug.Log(workStationType);
+        if (workStationType == WorkStationType.Fireplace)
+        {
+            if ((item1.name == "Wood" && item2.name == "Herb") ||
+                (item1.name == "Herb" && item2.name == "Wood"))
+            {
+                return true;
+            }
+        }
+        else if (workStationType == WorkStationType.Stovetop)
+        {
+            if ((item1.name == "Herb" && item2.name == "Stone") ||
+                (item1.name == "Stone" && item2.name == "Herb"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Log
   Description: 
-  Icon: {fileID: -868781085, guid: 1b180e69a49ce4d3cb0ddbd422e5e2bb, type: 3}
+  Icon: {fileID: 21300000, guid: ce61142a772af48a983638d442272448, type: 3}
   Stackable: 1
   onAction: {fileID: 0}
   resourceNodeType: 1
