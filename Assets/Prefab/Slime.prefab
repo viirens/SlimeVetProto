@@ -393,7 +393,7 @@ MonoBehaviour:
   injuredSprite: {fileID: 21300000, guid: 18914e6e6b35d4b6f911a4efba9cd0ad, type: 3}
   itemSprite: {fileID: 4521971894355334131}
   itemRequirement: {fileID: 11400000, guid: 15bdfb5b9473443d4b83fa89b86e3999, type: 2}
-  timeToLive: 30
+  timeToLive: 60
   healingDuration: 3
 --- !u!114 &4462438445869637570
 MonoBehaviour:

@@ -16,31 +16,26 @@ public class SlimeSpawner : MonoBehaviour
     }
 
     [SerializeField] private List<Wave> waves;
-    private int currentWaveIndex = 0;
 
-    void Start()
+    public void StartWave(int waveIndex)
     {
-        StartCoroutine(SpawnWaves());
+        if (waveIndex < waves.Count)
+        {
+            StartCoroutine(SpawnWave(waves[waveIndex]));
+        }
     }
 
-    IEnumerator SpawnWaves()
+    IEnumerator SpawnWave(Wave wave)
     {
-        while (currentWaveIndex < waves.Count)
+        for (int i = 0; i < wave.slimeCount; i++)
         {
-            Wave currentWave = waves[currentWaveIndex];
-            for (int i = 0; i < currentWave.slimeCount; i++)
-            {
-                SpawnSlime(currentWave.itemTier);
-                yield return new WaitForSeconds(currentWave.spawnInterval);
-            }
-            currentWaveIndex++;
-            yield return new WaitForSeconds(5f);
+            SpawnSlime(wave.itemTier);
+            yield return new WaitForSeconds(wave.spawnInterval);
         }
     }
 
     void SpawnSlime(int itemTier)
     {
-        // Debug.Log("Spawning slime with tier: " + itemTier);
         if (GameManager.instance.entryWayPoints.Count == 0 || slimePrefab == null)
             return;
 
@@ -53,5 +48,10 @@ public class SlimeSpawner : MonoBehaviour
         {
             slime.SetItemTier(itemTier);
         }
+    }
+
+    public int GetTotalWaves()
+    {
+        return waves.Count;
     }
 }

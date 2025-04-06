@@ -12,23 +12,18 @@ public class Slime : Interactable
     }
 
     [SerializeField]
-    private SlimeState currentState = SlimeState.Injured; 
+    private SlimeState currentState = SlimeState.Injured;
     public Sprite healthySprite;
     public Sprite injuredSprite;
     private SpriteRenderer spriteRenderer;
 
-    [SerializeField] private GameObject itemSprite; 
+    [SerializeField] private GameObject itemSprite;
     [SerializeField] private SlimeItemRequirement itemRequirement;
     private Item requiredItem;
 
-    [Header("Slime Timer Settings")]
-    [SerializeField] private float timeToLive = 30f; // Time in seconds before the slime dies
-    private float timer;
-    private bool isTimerActive = false;
-
     private bool isBeingHealed = false;
     private float healingProgress = 0f;
-    [SerializeField] private float healingDuration = 5f; 
+    [SerializeField] private float healingDuration = 5f;
 
     private HighlightController highlightController;
 
@@ -41,10 +36,7 @@ public class Slime : Interactable
         requiresOverlap = customRequiresOverlap;
         spriteRenderer = GetComponent<SpriteRenderer>();
         UpdateSprite();
-        itemSprite.SetActive(false); 
-
-        timer = timeToLive;
-        isTimerActive = true;
+        itemSprite.SetActive(false);
 
         RandomizeColor();
 
@@ -55,15 +47,6 @@ public class Slime : Interactable
 
     void Update()
     {
-        if (isTimerActive)
-        {
-            timer -= Time.deltaTime;
-            if (timer <= 0)
-            {
-                SlimeDies();
-            }
-        }
-
         if (isBeingHealed && !IsCharacterInRange())
         {
             CancelHealing();
@@ -76,11 +59,6 @@ public class Slime : Interactable
         {
             character.RemoveItem(requiredItem, 1);
             StartHealing();
-            // Debug.Log("Slime healing started by character: " + character.name);
-        }
-        else
-        {
-            Debug.Log("Interaction failed: Character does not have the required item or slime is not interactable");
         }
     }
 
@@ -91,7 +69,6 @@ public class Slime : Interactable
             if (!isBeingHealed)
             {
                 isBeingHealed = true;
-                isTimerActive = false;
                 interactingCharacter = character;
                 highlightController.ShowProgressBar(gameObject, transform.position);
             }
@@ -120,27 +97,22 @@ public class Slime : Interactable
     {
         isBeingHealed = true;
         healingProgress = 0f;
-        isTimerActive = false;
-        Debug.Log("Healing process started");
     }
 
     public void CompleteHealing()
     {
         isBeingHealed = false;
         SetState(SlimeState.Healthy);
-        // Debug.Log("Healing complete: Slime state set to Healthy.");
 
         SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
         if (slimeMovement != null)
         {
             slimeMovement.MoveToExit();
-            // Debug.Log("Slime is moving to exit.");
         }
 
         itemSprite.SetActive(false);
         highlightController.RemoveProgressBar(gameObject);
 
-        // Increment the slimes healed count
         GameManager.instance.IncrementSlimesHealed();
     }
 
@@ -148,14 +120,22 @@ public class Slime : Interactable
     {
         if (itemRequirement != null && itemRequirement.possibleItems.Count > 0)
         {
-            Debug.Log("Choosing random item for slime with tier: " + itemTier);
             List<Item> tieredItems = itemRequirement.GetItemsByTier(itemTier);
-            Debug.Log("Tiered items count: " + tieredItems.Count);
+            Debug.Log($"[Slime] itemTier: {itemTier}, tieredItems count: {tieredItems.Count}");
+            foreach (Item item in tieredItems)
+            {
+                Debug.Log($"[Slime] Tiered item: {item.Name}, tiers: {string.Join(",", item.tiers)}");
+            }
+
             if (tieredItems.Count == 0)
+            {
+                Debug.LogWarning($"[Slime] No items found for tier {itemTier}, using all possible items.");
                 tieredItems = itemRequirement.possibleItems;
+            }
 
             int randomIndex = Random.Range(0, tieredItems.Count);
             requiredItem = tieredItems[randomIndex];
+            Debug.Log($"[Slime] Selected required item: {requiredItem.Name}, tiers: {string.Join(",", requiredItem.tiers)}");
 
             SpriteRenderer itemSpriteRenderer = itemSprite.GetComponent<SpriteRenderer>();
             if (itemSpriteRenderer != null)
@@ -173,20 +153,17 @@ public class Slime : Interactable
 
         Color randomColor = Color.HSVToRGB(hue, saturation, value);
         spriteRenderer.color = randomColor;
-        // Debug.Log("Slime color randomized to: " + randomColor);
     }
 
     public void SetInteractable(bool value)
     {
         isInteractable = value;
-        // Debug.Log("Slime interactable set to: " + value);
     }
 
     public void SetState(SlimeState newState)
     {
         currentState = newState;
         UpdateSprite();
-        // Debug.Log("Slime state updated to: " + currentState);
     }
 
     private void UpdateSprite()
@@ -200,7 +177,6 @@ public class Slime : Interactable
                 spriteRenderer.sprite = injuredSprite;
                 break;
         }
-        // Debug.Log("Slime sprite updated to match state: " + currentState);
     }
 
     public SlimeState GetCurrentState()
@@ -208,16 +184,9 @@ public class Slime : Interactable
         return currentState;
     }
 
-    public void ShowItemSprite() 
+    public void ShowItemSprite()
     {
         itemSprite.SetActive(true);
-        // Debug.Log("Item sprite shown");
-    }
-
-    private void SlimeDies()
-    {
-        Debug.Log("Slime died due to timeout.");
-        Destroy(gameObject);
     }
 
     private void OnDestroy()
@@ -231,7 +200,6 @@ public class Slime : Interactable
         {
             isBeingHealed = false;
             healingProgress = 0f;
-            isTimerActive = true;
             interactingCharacter = null;
             highlightController.RemoveProgressBar(gameObject);
         }

@@ -10,15 +10,24 @@ public class GameManager : MonoBehaviour
     public List<Transform> entryWayPoints;
     public List<Transform> exitWayPoints;
     public TextMeshProUGUI slimesHealedText;
+    public TextMeshProUGUI waveText;
+    public TextMeshProUGUI waveTimerText;
     public TextMeshProUGUI gameOverText;
-    private int slimesHealed = 0;
+    private int totalSlimesHealed = 0;
+    private int slimesHealedInWave = 0;
     private bool isGameOver = false;
 
     [Header("Game Settings")]
-    [SerializeField] public float timeLimit = 180f; // Time limit in seconds
-    [SerializeField] private int slimesToHeal = 5;    // Number of slimes to heal to win
-    
+    public float waveTimeLimit = 60f;
+    public int slimesToHealPerWave = 3;
+    private int currentWaveIndex = 0;
 
+    public GameObject player;
+    public ItemContainer inventoryContainer;
+    public ItemDragAndDropController itemDragAndDropController;
+    public ItemSpawnManager itemSpawnManager;
+
+    private Coroutine waveTimerCoroutine;
 
     private void Awake()
     {
@@ -33,70 +42,103 @@ public class GameManager : MonoBehaviour
         exitWayPoints = new List<Transform>(GameObject.Find("ExitLocations").GetComponentsInChildren<Transform>());
         exitWayPoints.Remove(GameObject.Find("ExitLocations").transform);
 
-        Debug.Log("Entry waypoints: " + entryWayPoints.Count);
-        Debug.Log("Exit waypoints: " + exitWayPoints.Count);
-
+        UpdateWaveText();
         UpdateSlimesHealedUI();
         gameOverText.gameObject.SetActive(false);
+        StartWave();
     }
-
-    public GameObject player;
-    public ItemContainer inventoryContainer;
-    public ItemDragAndDropController itemDragAndDropController;
-    public ItemSpawnManager itemSpawnManager;
 
     public void IncrementSlimesHealed()
     {
-        slimesHealed++;
+        totalSlimesHealed++;
+        slimesHealedInWave++;
         UpdateSlimesHealedUI();
-        CheckWinCondition();
+        CheckWaveCompletion();
     }
 
     void UpdateSlimesHealedUI()
     {
-        slimesHealedText.text = "Slimes Healed: " + slimesHealed + " / " + slimesToHeal;
+        slimesHealedText.text = "Slimes Healed: " + slimesHealedInWave + " / " + slimesToHealPerWave;
     }
 
-    public void TimeUp()
+    void UpdateWaveText()
     {
+        waveText.text = "Wave: " + (currentWaveIndex + 1);
+    }
+
+    void StartWave()
+    {
+        slimesHealedInWave = 0;
+        UpdateWaveText();
+        UpdateSlimesHealedUI();
+        SlimeSpawner spawner = FindObjectOfType<SlimeSpawner>();
+        if (spawner != null)
+        {
+            spawner.StartWave(currentWaveIndex);
+        }
+        waveTimerCoroutine = StartCoroutine(WaveTimer());
+    }
+
+    IEnumerator WaveTimer()
+    {
+        float timer = waveTimeLimit;
+        while (timer > 0)
+        {
+            timer -= Time.deltaTime;
+            UpdateWaveTimerUI(timer);
+            yield return null;
+        }
         if (!isGameOver)
         {
-            isGameOver = true;
+            DestroyRemainingSlimes();
             GameOver(false);
         }
     }
 
-    void CheckWinCondition()
+    void UpdateWaveTimerUI(float timer)
     {
-        if (slimesHealed >= slimesToHeal && !isGameOver)
+        int minutes = Mathf.FloorToInt(timer / 60f);
+        int seconds = Mathf.FloorToInt(timer % 60f);
+        waveTimerText.text = string.Format("Time Left In Wave: {0:00}:{1:00}", minutes, seconds);
+    }
+
+    void CheckWaveCompletion()
+    {
+        if (slimesHealedInWave >= slimesToHealPerWave && !isGameOver)
         {
-            isGameOver = true;
-            GameOver(true);
+            if (waveTimerCoroutine != null)
+            {
+                StopCoroutine(waveTimerCoroutine);
+                waveTimerCoroutine = null;
+            }
+
+            DestroyRemainingSlimes();
+
+            currentWaveIndex++;
+            if (currentWaveIndex >= GetTotalWaves())
+            {
+                GameOver(true);
+            }
+            else
+            {
+                StartWave();
+            }
         }
+    }
+
+    int GetTotalWaves()
+    {
+        SlimeSpawner spawner = FindObjectOfType<SlimeSpawner>();
+        if (spawner != null)
+        {
+            return spawner.GetTotalWaves();
+        }
+        return 0;
     }
 
     void GameOver(bool hasWon)
     {
-        // if (hasWon)
-        // {
-        //     gameOverText.text = "You Win!";
-        // }
-        // else
-        // {
-        //     gameOverText.text = "Game Over";
-        // }
-        // gameOverText.gameObject.SetActive(true);
-
-        // Optionally, stop spawning slimes
-        // SlimeSpawner spawner = FindObjectOfType<SlimeSpawner>();
-        // if (spawner != null)
-        // {
-        //     spawner.StopSpawning();
-        // }
-
-        // Disable player controls if necessary
-        // player.GetComponent<PlayerController>().enabled = false;
-
+        isGameOver = true;
         if (hasWon)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
@@ -104,6 +146,15 @@ public class GameManager : MonoBehaviour
         else
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+    }
+
+    void DestroyRemainingSlimes()
+    {
+        Slime[] remainingSlimes = FindObjectsOfType<Slime>();
+        foreach (Slime slime in remainingSlimes)
+        {
+            Destroy(slime.gameObject);
         }
     }
 }
