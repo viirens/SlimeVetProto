@@ -12,104 +12,145 @@ public class Slime : Interactable
     }
 
     [SerializeField]
-    private SlimeState currentState = SlimeState.Injured; 
+    private SlimeState currentState = SlimeState.Injured;
     public Sprite healthySprite;
     public Sprite injuredSprite;
     private SpriteRenderer spriteRenderer;
 
-    [SerializeField] private GameObject itemSprite; 
+    [SerializeField] private GameObject itemSprite;
     [SerializeField] private SlimeItemRequirement itemRequirement;
     private Item requiredItem;
 
-    [Header("Slime Timer Settings")]
-    [SerializeField] private float timeToLive = 30f; // Time in seconds before the slime dies
-    private float timer;
-    private bool isTimerActive = false;
+    private bool isBeingHealed = false;
+    private float healingProgress = 0f;
+    [SerializeField] private float healingDuration = 5f;
+
+    private HighlightController highlightController;
+
+    private Character interactingCharacter;
+
+    private int itemTier = 1;
 
     void Start()
     {
         requiresOverlap = customRequiresOverlap;
         spriteRenderer = GetComponent<SpriteRenderer>();
         UpdateSprite();
-        itemSprite.SetActive(false); 
+        itemSprite.SetActive(false);
+
+        RandomizeColor();
+
+        highlightController = FindObjectOfType<HighlightController>();
 
         ChooseRandomItem();
-
-        timer = timeToLive;
-        isTimerActive = true;
-
-        // Randomize the color of the slime
-        RandomizeColor();
     }
 
     void Update()
     {
-        if (isTimerActive)
+        if (isBeingHealed && !IsCharacterInRange())
         {
-            timer -= Time.deltaTime;
-            if (timer <= 0)
-            {
-                SlimeDies();
-            }
+            CancelHealing();
         }
     }
 
     public override void Interact(Character character)
     {
-        if (isInteractable && currentState == SlimeState.Injured)
+        if (isInteractable && currentState == SlimeState.Injured && character.HasItem(requiredItem))
         {
-            if (character.HasItem(requiredItem))
+            character.RemoveItem(requiredItem, 1);
+            StartHealing();
+        }
+    }
+
+    public override void InteractHold(Character character)
+    {
+        if (isInteractable && currentState == SlimeState.Injured && character.HasItem(requiredItem))
+        {
+            if (!isBeingHealed)
             {
-                character.RemoveItem(requiredItem, 1); // Remove the item from the inventory
-                SetState(SlimeState.Healthy);
-                Debug.Log("Slime healed");
-
-                SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
-                if (slimeMovement != null)
-                {
-                    slimeMovement.MoveToExit();
-                }
-
-                itemSprite.SetActive(false);
-                isTimerActive = false; // Stop the timer when healed
+                isBeingHealed = true;
+                interactingCharacter = character;
+                highlightController.ShowProgressBar(gameObject, transform.position);
             }
-            else
+
+            healingProgress += Time.deltaTime;
+            highlightController.UpdateProgressBar(gameObject, healingProgress / healingDuration);
+
+            if (healingProgress >= healingDuration)
             {
-                Debug.Log("Character does not have the required item");
+                character.RemoveItem(requiredItem, 1);
+                CompleteHealing();
             }
         }
+        else
+        {
+            CancelHealing();
+        }
+    }
+
+    public override void InteractReleased(Character character)
+    {
+        CancelHealing();
+    }
+
+    private void StartHealing()
+    {
+        isBeingHealed = true;
+        healingProgress = 0f;
+    }
+
+    public void CompleteHealing()
+    {
+        isBeingHealed = false;
+        SetState(SlimeState.Healthy);
+
+        SlimeMovement slimeMovement = GetComponent<SlimeMovement>();
+        if (slimeMovement != null)
+        {
+            slimeMovement.MoveToExit();
+        }
+
+        itemSprite.SetActive(false);
+        highlightController.RemoveProgressBar(gameObject);
+
+        GameManager.instance.IncrementSlimesHealed();
     }
 
     private void ChooseRandomItem()
     {
         if (itemRequirement != null && itemRequirement.possibleItems.Count > 0)
         {
-            int randomIndex = Random.Range(0, itemRequirement.possibleItems.Count);
-            requiredItem = itemRequirement.possibleItems[randomIndex];
-            Debug.Log("Slime requires: " + requiredItem.Name);
+            List<Item> tieredItems = itemRequirement.GetItemsByTier(itemTier);
+            Debug.Log($"[Slime] itemTier: {itemTier}, tieredItems count: {tieredItems.Count}");
+            foreach (Item item in tieredItems)
+            {
+                Debug.Log($"[Slime] Tiered item: {item.Name}, tiers: {string.Join(",", item.tiers)}");
+            }
 
-            // Set the sprite of the itemSprite GameObject to the icon of the required item
+            if (tieredItems.Count == 0)
+            {
+                Debug.LogWarning($"[Slime] No items found for tier {itemTier}, using all possible items.");
+                tieredItems = itemRequirement.possibleItems;
+            }
+
+            int randomIndex = Random.Range(0, tieredItems.Count);
+            requiredItem = tieredItems[randomIndex];
+            Debug.Log($"[Slime] Selected required item: {requiredItem.Name}, tiers: {string.Join(",", requiredItem.tiers)}");
+
             SpriteRenderer itemSpriteRenderer = itemSprite.GetComponent<SpriteRenderer>();
             if (itemSpriteRenderer != null)
             {
                 itemSpriteRenderer.sprite = requiredItem.Icon;
-            }
-            else
-            {
-                Debug.LogError("Item sprite GameObject does not have a SpriteRenderer component.");
             }
         }
     }
 
     private void RandomizeColor()
     {
-        // Generate a random hue value
         float hue = Random.Range(0f, 1f);
-        // Set saturation and value to ensure bright and vibrant colors
         float saturation = Random.Range(0.5f, 1f);
         float value = Random.Range(0.7f, 1f);
 
-        // Convert HSV to RGB and apply to the sprite renderer
         Color randomColor = Color.HSVToRGB(hue, saturation, value);
         spriteRenderer.color = randomColor;
     }
@@ -143,17 +184,41 @@ public class Slime : Interactable
         return currentState;
     }
 
-    public void ShowItemSprite() 
+    public void ShowItemSprite()
     {
         itemSprite.SetActive(true);
     }
 
-    private void SlimeDies()
+    private void OnDestroy()
     {
-        Debug.Log("Slime died due to timeout.");
+        highlightController.RemoveProgressBar(gameObject);
+    }
 
-        // Add death animation or effects here if desired
+    private void CancelHealing()
+    {
+        if (isBeingHealed)
+        {
+            isBeingHealed = false;
+            healingProgress = 0f;
+            interactingCharacter = null;
+            highlightController.RemoveProgressBar(gameObject);
+        }
+    }
 
-        Destroy(gameObject); // Remove the slime from the game
+    private bool IsCharacterInRange()
+    {
+        if (interactingCharacter == null)
+            return false;
+
+        CharacterInteractController interactController = interactingCharacter.GetComponent<CharacterInteractController>();
+        if (interactController == null)
+            return false;
+
+        return interactController.CurrentInteractable == this;
+    }
+
+    public void SetItemTier(int tier)
+    {
+        itemTier = tier;
     }
 }

@@ -12,20 +12,53 @@ public class CharacterInteractController : MonoBehaviour
     Character character;
     [SerializeReference] HighlightController highlightController;
 
+    public Interactable CurrentInteractable { get; private set; }
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController2D>();
         rgb2d = GetComponent<Rigidbody2D>();
         character = GetComponent<Character>();
-        Debug.Log(character);
     }
 
     void Update()
     {
         CheckForInteractableObjects();
+        // Debug.Log("Interacting with object");
+
+        // to consolidate
         if (Input.GetMouseButtonDown(1))
         {
-            Interact();
+            
+            Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+            foreach (Collider2D collider in colliders)
+            {
+                Interactable interactable = collider.GetComponent<Interactable>();
+                if (interactable != null)
+                {
+                    if (!collider.CompareTag("Slime"))
+                    {
+                        Interact();
+                    }
+                    else
+                    {
+                        InteractHold();
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            InteractHold();
+        }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            InteractReleased();
         }
     }
 
@@ -34,17 +67,30 @@ public class CharacterInteractController : MonoBehaviour
         Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
         Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
 
+        Interactable closestInteractable = null;
+
         foreach (Collider2D collider in colliders)
         {
             Interactable hit = collider.GetComponent<Interactable>();
             if (hit != null)
             {
-                highlightController.Highlight(hit.gameObject);
-                return;
+                if (closestInteractable == null || Vector2.Distance(transform.position, hit.transform.position) < Vector2.Distance(transform.position, closestInteractable.transform.position))
+                {
+                    closestInteractable = hit;
+                }
             }
         }
-        
-        highlightController.Hide();
+
+        if (closestInteractable != null)
+        {
+            highlightController.Highlight(closestInteractable.gameObject);
+            CurrentInteractable = closestInteractable;
+        }
+        else
+        {
+            highlightController.Hide();
+            CurrentInteractable = null;
+        }
     }
 
     void Interact()
@@ -79,5 +125,45 @@ public class CharacterInteractController : MonoBehaviour
 
         // Draw the overlap circle
         Gizmos.DrawWireSphere(position, sizeOfInteractableArea);
+    }
+
+    void InteractHold()
+    {
+        Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+        foreach (Collider2D collider in colliders)
+        {
+            Interactable interactable = collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                Vector2 directionToCollider = (collider.transform.position - transform.position).normalized;
+                if (Vector2.Dot(characterController.lastMotionVector, directionToCollider) > 0.5f)
+                {
+                    interactable.InteractHold(character);
+                    break;
+                }
+            }
+        }
+    }
+
+    void InteractReleased()
+    {
+        Vector2 position = rgb2d.position + characterController.lastMotionVector * offsetDistance;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(position, sizeOfInteractableArea);
+
+        foreach (Collider2D collider in colliders)
+        {
+            Interactable interactable = collider.GetComponent<Interactable>();
+            if (interactable != null)
+            {
+                Vector2 directionToCollider = (collider.transform.position - transform.position).normalized;
+                if (Vector2.Dot(characterController.lastMotionVector, directionToCollider) > 0.5f)
+                {
+                    interactable.InteractReleased(character);
+                    break;
+                }
+            }
+        }
     }
 }

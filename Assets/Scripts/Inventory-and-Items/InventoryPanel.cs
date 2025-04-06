@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
-using UnityEditor.Search;
 using UnityEngine;
 
 public class InventoryPanel : ItemPanel

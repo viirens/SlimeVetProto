@@ -16,6 +16,7 @@ public class SlimeMovement : MonoBehaviour
     private LineRenderer lineRenderer;
     public bool isInteractable = false; // Add this flag to track interactability
     private Transform waypoint; // Declare the waypoint variable
+    [SerializeField] private Transform[] exitPoints;
 
     // Add this variable
     [SerializeField] private float waypointRadius = 10f; // Radius around the waypoint for slimes to pick positions
@@ -40,7 +41,7 @@ public class SlimeMovement : MonoBehaviour
         if (waypointObject != null)
         {
             waypoint = waypointObject.transform;
-            Debug.Log("Waypoint found: " + waypointObject.name);
+            // Debug.Log("Waypoint found: " + waypointObject.name);
         }
         else
         {
@@ -114,7 +115,7 @@ public class SlimeMovement : MonoBehaviour
                 SetInteractableState(!isExiting); // Update interactability based on exiting state
                 if (isExiting)
                 {
-                    Debug.Log("Arrived at exit");
+                    // Debug.Log("Arrived at exit");
                 }
                 else
                 {
@@ -123,7 +124,7 @@ public class SlimeMovement : MonoBehaviour
                     {
                         slime.ShowItemSprite(); // Show the item sprite when arriving at the waypoint
                     }
-                    Debug.Log("Arrived at waypoint");
+                    // Debug.Log("Arrived at waypoint");
                 }
             }
         }
@@ -154,7 +155,10 @@ public class SlimeMovement : MonoBehaviour
 
         // Implement logic to move the slime to the nearest map edge
         // For simplicity, let's assume the exit is to the right
-        Vector2 exitPosition = new Vector2(grid.gridWorldSize.x / 2, transform.position.y);
+        // Vector2 exitPosition = new Vector2(grid.gridWorldSize.x / 2, transform.position.y);
+        // choose a random exit waypoint
+        int randomExitIndex = Random.Range(0, GameManager.instance.exitWayPoints.Count);
+        Vector2 exitPosition = GameManager.instance.exitWayPoints[randomExitIndex].position;
         path = pathfinding.FindPath(transform.position, exitPosition);
         targetIndex = 0;
         hasArrived = false;
@@ -182,5 +186,12 @@ public class SlimeMovement : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         Debug.Log("Collided with " + collision.gameObject.name);
+    }
+
+    //debug visualization of waypoint radius
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(waypoint.position, waypointRadius);
     }
 }

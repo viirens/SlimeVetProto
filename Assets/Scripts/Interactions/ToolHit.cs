@@ -9,8 +9,18 @@ public class ToolHit : MonoBehaviour
         Debug.Log("Hit");
     }
 
+    public virtual void HitHold()
+    {
+        Debug.Log("HitHold");
+    }
+
     public virtual bool CanBeHit(List<ResourceNodeType> canBeHitByTool)
     {
         return true;
+    }
+
+    public virtual void InteractReleased(Character character)
+    {
+        Debug.Log("InteractReleased");
     }
 }

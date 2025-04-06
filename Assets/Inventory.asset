@@ -17,12 +17,12 @@ MonoBehaviour:
     count: 1
   - item: {fileID: 11400000, guid: 28f0818b6adc442c9833ada7b0ffd74d, type: 2}
     count: 1
-  - item: {fileID: 11400000, guid: 51830097d8309469aadd262f4ceb600f, type: 2}
-    count: 308
-  - item: {fileID: 11400000, guid: 120bffe665d124b7baeec9f0e71d25b6, type: 2}
+  - item: {fileID: 0}
     count: 0
-  - item: {fileID: 11400000, guid: 712046cf04db44163a0b9f3f45407bd8, type: 2}
-    count: 59
+  - item: {fileID: 0}
+    count: 0
+  - item: {fileID: 0}
+    count: 0
   - item: {fileID: 0}
     count: 0
   - item: {fileID: 0}

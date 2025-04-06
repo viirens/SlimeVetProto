@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ResourceNodeType { Undefined, Tree, Ore }
+public enum ResourceNodeType { Undefined, Tree, Ore, Herb }
 
 [CreateAssetMenu(fileName = "New Gather Resource Node", menuName = "Data/Gather Resource Node")]
 
 public class GatherResourceNode : ToolAction
 {
     [SerializeField] float sizeOfInteractableArea = 1.2f;
-    [SerializeField] List<ResourceNodeType> canHitNodesOfType;
+    [SerializeField] public List<ResourceNodeType> canHitNodesOfType;
     public override bool OnApply(Vector2 position)
     {
 

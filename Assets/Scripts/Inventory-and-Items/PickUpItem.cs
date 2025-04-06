@@ -23,8 +23,6 @@ public class PickUpItem : MonoBehaviour
 
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = item.Icon;
-
-        
     }
 
     private void Update()
